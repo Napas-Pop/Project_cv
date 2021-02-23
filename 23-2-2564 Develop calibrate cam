@@ -55,7 +55,7 @@ def calibrate_cam(height, width, square_size): #calibrate camera by picture from
     imgpoints = []  # 2d points in image plane.
 
 
-    images = glob.glob('image*.jpg') #if you adjust path name please adjust variable filename too, it is the same name.
+    images = glob.glob('image*.png') #if you adjust path name please adjust variable filename too, it is the same name.
 
     for fname in images:
         img = cv2.imread(fname)
