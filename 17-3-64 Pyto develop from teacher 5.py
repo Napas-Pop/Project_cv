@@ -29,6 +29,10 @@ def button_r_pressed(sender): #reset zero
     global tvec
     global blow
     global dist
+    global data_tvecs
+    global value_dis
+    data_tvecs = []  
+    value_dis = [] 
     tvec_ini=tvec
     dist =0
     blow=0
@@ -47,6 +51,8 @@ def track(matrix_coefficients, distortion_coefficients,markerLength):
     global tvec
     global blow
     global dist_show
+    global data_tvecs
+    global value_dis
     sum_tvec=0
     blow=0.000
     dist=0
