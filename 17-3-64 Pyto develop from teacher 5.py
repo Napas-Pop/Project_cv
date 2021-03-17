@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import pyto_ui as ui
 import pyto_ui as ui
 import math
