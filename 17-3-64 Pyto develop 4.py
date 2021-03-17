@@ -1,15 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import pyto_ui as ui
 import pyto_ui as ui
 import math
@@ -20,9 +8,6 @@ import cv2.aruco as aruco
 import pandas as pd
 from PIL import Image
 import time
-
-
-# In[ ]:
 
 
 matrix_coefficients = [[394.25885619, 0.00000000e+00, 176.79297187, ],  # From calibrte camera
@@ -40,7 +25,6 @@ cY_ini =50
 makerLength = 0.2 #m
 dist_show=0
 
-# In[ ]:
 
 
 def button_pressed(sender):
@@ -69,7 +53,6 @@ def d():
     print('Distance', data_value_dis)  # show distance between tvec
 
 
-# In[ ]:
 
 
 def track(matrix_coefficients, distortion_coefficients,markerLength):
@@ -172,7 +155,7 @@ def track(matrix_coefficients, distortion_coefficients,markerLength):
     return
 
 
-# In[ ]:
+
 
 
 cap = cv2.VideoCapture(0)  # Get the camera source
