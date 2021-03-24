@@ -180,7 +180,7 @@ def track(matrix_coefficients, distortion_coefficients,markerLength,frame_rate):
 
 # In[17]:
 
-
+#Part run
 device = 0 #'rtsp://192.168.1.40:8080/h264_pcm.sdp'
 print('press s to start the program or q to exit the program')
 print('If you want to reset the data press r')
