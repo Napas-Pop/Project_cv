@@ -370,6 +370,7 @@ def last_ten_blows():
                 diff_text="{:.3f}".format(float(dist))
                 blow_show="{:.3f}".format(float(blow))
                 label1.text= 'distance= ' + diff_text +' m'
+                label2.text= ""
                 #label2.text ='deform per blows='+blow_show + ' m'
                 #label3.text ='deform per blows realtime ='+ str(np.round(blow,4))+ ' m'
 
@@ -420,7 +421,7 @@ def last_ten_blows():
     
     button_ch = ui.Button(title="setting")
     button_ch.size = (100, 30)
-    button_ch.center = (view.width/2+160, 50)
+    button_ch.center = (view.width/2+160, 20)
     button_ch.flex = [
         ui.FLEXIBLE_TOP_MARGIN,
         ui.FLEXIBLE_BOTTOM_MARGIN,
@@ -435,7 +436,7 @@ def last_ten_blows():
     label1.size=(view.width,40)
     label1.text_alignment=ui.TEXT_ALIGNMENT_CENTER
     label1.flex = [ui.FLEXIBLE_WIDTH]
-    label1.text = "Pile Drive Develop ver.10"
+    label1.text = "Pile Drive Develop ver.11"
     view.add_subview(label1)
 
     #show the size of marker
