@@ -489,7 +489,7 @@ def last_ten_blows():
 
 
 # In[ ]:
-
+last_ten_blows()
 
 
 
