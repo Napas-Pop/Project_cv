@@ -253,7 +253,7 @@ label4 =ui.Label()
 label4.size=(view.width,300)
 label4.text_alignment=ui.TEXT_ALIGNMENT_CENTER
 label4.flex = [ui.FLEXIBLE_WIDTH]
-label4.text = "\n\n\nGuidance on use\n" + "-------------------------\n" + "1.please press start to start calibration\n" + "\n2. please wait for the processing\n"+"\n3. the resault will show you can get the data\n if you want by press 'Export data' it will show in your icloud, the type of file is csv, it can open in excel.Your file will be named-calibrate camera.csv"" + "-------------------------\n" 
+label4.text = "\n\n\nGuidance on use\n" + "-------------------------\n" + "1.please press start to start calibration\n" + "\n2. please wait for the processing\n"+"\n3. the resault will show you can get the data\n if you want by press 'Export data' it will show in your icloud, the type of file is csv, it can open in excel.\n" + "-------------------------\n" + "Your file will be named-calibrate camera.csv"
 view1.add_subview(label4)
 
 label5 =ui.Label()
