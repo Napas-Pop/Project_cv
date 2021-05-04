@@ -1,0 +1,88 @@
+import cv2
+import glob
+import numpy as np
+device = 'rtsp://192.168.1.40:8080/h264_pcm.sdp'
+#for capture picture from the video and calibrate camera
+#if you adjust the name of variable filename please adjust the name in() of glob.glob() in calibrate_cam function too, it is the same name.
+filename = 'Testcam' 
+
+#for calibrate camera
+height = 6 #chase board
+width = 8 #chase board
+square_size = 0.03 #meter
+
+def cap_image(filename):
+    i= 0 #series image 
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            continue
+        show = frame.copy() #For show window
+        #Put text to coutn the capture image
+        font = cv2.FONT_HERSHEY_SIMPLEX 
+        text = 'Get the picture  '+str(i)+'/50'
+        org = (50,300)
+        fontScale = 0.5
+        color = (0, 0, 255)
+        thickness = 2
+        text = cv2.putText(show, text, org, font,  
+                       fontScale, color, thickness, cv2.LINE_AA)
+        #show window
+        cv2.imshow('Capture image', text)
+        key = cv2.waitKey(3) & 0xFF
+        if key == ord('c'):
+            i += 1
+            showpic = cv2.imwrite(filename+str(i)+'.png', frame)
+
+        if key == ord('s'): #start to cap or restart the series number
+            i = 0
+        if key == ord('q'): #Quit
+            print('stop to cap')
+            print('start to calibrate camera')
+            cap.release()
+            cv2.destroyAllWindows()
+            break 
+
+def calibrate_cam(height, width, square_size): #calibrate camera by picture from function cap_image
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+    objp = np.zeros((height*width, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:width, 0:height].T.reshape(-1, 2)
+
+    objp = objp * square_size
+
+        # Arrays to store object points and image points from all the images.
+    objpoints = []  # 3d point in real world space
+    imgpoints = []  # 2d points in image plane.
+
+
+    images = glob.glob('Testcam*.png') #if you adjust path name please adjust variable filename too, it is the same name.
+    print('The number of images that can be used ',len(images))
+
+    for fname in images:
+        img = cv2.imread(fname)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # Find the chess board corners
+        ret, corners = cv2.findChessboardCorners(gray, (width, height), None)
+
+            # If found, add object points, image points (after refining them)
+        if ret:
+            objpoints.append(objp)
+
+            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+            imgpoints.append(corners2)
+
+                # Draw and display the corners
+            img = cv2.drawChessboardCorners(img, (width, height), corners2, ret)
+
+    ret, mstx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+    print("Camera matrix : \n")
+    print(mstx)
+    print("dist : \n")
+    print(dist)
+
+#Run the program ,Develop by Pop Napas
+
+#cap = cap = cv2.VideoCapture(device)
+#cap_image(filename) #get the image to calibrate
+calibrate_cam(height, width, square_size) #calibrate camera to get the camera metrix and dist
