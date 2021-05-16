@@ -76,6 +76,7 @@ def print_pressed(sender): #Editing data collection and handling
     #data_check = pd.DataFrame(check, columns = ['check'])
     data_value_dis= pd.DataFrame(value_dis, columns = ['real Distance'])
     data_value_dis.to_csv(name_csv_dist)
+    print("print")
     #data_blow.to_csv(name_csv_blow)
     #data_check.to_csv(name_csv_check)
 
