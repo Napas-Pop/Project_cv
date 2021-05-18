@@ -64,7 +64,7 @@ def print_pressed(sender): #Editing data collection and handling
     global time_data
     data_value_dis= {'real distance': [value_dis], 'time progress': [time_data]}
     export = pd.DataFrame(export)
-    export.to_csv(name_csv_dist)
+    export.to_csv(name_csv_dist+'.csv')
     x= time_data
     y= value_dis
     plt.plot(x,y)
