@@ -8,6 +8,8 @@ import pandas as pd
 from PIL import Image
 import location as loc
 import time
+#import matplotlib.pyplot as plt
+#from scipy.optimize import curve_fit
 
 
 name_csv_dist = 'test01'
@@ -62,16 +64,11 @@ def print_pressed(sender): #Editing data collection and handling
     global value_dis
     global name_csv_dist
     global time_data
-    data_value_dis= {'real distance': [value_dis], 'time progress': [time_data]}
-    export = pd.DataFrame(export)
-    export.to_csv(name_csv_dist+'.csv')
-    x= time_data
-    y= value_dis
-    plt.plot(x,y)
-    plt.title(name_csv_dist+', Relationship between Time(sec.) and Distance(m.)')
-    plt.xlabel('Time (sec.)')
-    plt.ylabel('Distance (m.)')
-    plt.savefig(name_csv_dist+'.png')
+    data_value_dis= pd.DataFrame(value_dis, columns = ['real Distance'])
+    data_time = pd.DataFrame(time_data, columns = ['data time'])
+    data_value_dis.to_csv(name_csv_dist+'.csv')
+    data_time.to_csv(name_csv_dist+'time.csv')
+    
 
 def track(matrix_coefficients, distortion_coefficients,markerLength,frame_rate):
     print('check markerLengt', markerLength)
