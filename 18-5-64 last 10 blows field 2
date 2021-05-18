@@ -43,6 +43,8 @@ def button_r_pressed(sender): #reset zero
     global cX_ini
     global cY_ini
     global check
+    global time_data
+    global time_s
     
     data_tvecs=[]
     value_dis=[]
@@ -87,6 +89,8 @@ def track(matrix_coefficients, distortion_coefficients,markerLength,frame_rate):
     global dist
     global data_tvecs
     global value_dis
+    global time_data
+    global time_s
     #global value_blow
     #global pile_drive
     data_tvecs = []  # Prepare to add tvec
