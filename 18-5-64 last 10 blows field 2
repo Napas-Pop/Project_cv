@@ -45,7 +45,6 @@ def button_r_pressed(sender): #reset zero
     global check
     global time_data
     global time_s
-    
     data_tvecs=[]
     value_dis=[]
     #value_blow = []
@@ -150,8 +149,8 @@ def track(matrix_coefficients, distortion_coefficients,markerLength,frame_rate):
                         dist=sum_tvec
                         value_dis.append(np.round(sum_tvec, 3))  # get the distance data(scalar)  in array value
                     if dist != [] :
-                    time_get = time.time()- time_s 
-                    time_data.append(np.round(time_get, 3))
+                        time_get = time.time()- time_s 
+                        time_data.append(np.round(time_get, 3))
             if len(corners) > 0:
                 # flatten the ArUco IDs list
                 ids = ids.flatten()
