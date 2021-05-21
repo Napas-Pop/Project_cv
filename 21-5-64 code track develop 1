@@ -1,0 +1,227 @@
+from math import *
+import numpy as np
+import cv2
+import cv2.aruco as aruco
+import pandas as pd
+from PIL import Image
+import time
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+import numpy as np
+
+#location excel
+patch1 = r"D:\2563-4\2-2563\Project\test field\report\BC1_1.xlsx"
+patch2 = r"D:\2563-4\2-2563\Project\test field\report\BCcheck1_1.xlsx"
+patch3 = r"D:\2563-4\2-2563\Project\test field\report\LB1_dis2.xlsx"
+
+#define frame rate limit
+frame_rate =60
+
+#define size of ArUco
+markerLength = 0.2 #m
+
+#for track from camera calibration
+matrix_coefficients = [[1.07729557e+03, 0.00000000e+00, 7.40231371e+02,], 
+                       [0.00000000e+00, 1.07316875e+03, 5.51345664e+02,],
+                       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]]
+distortion_coefficients = [[ 1.38914028e-01, -3.23710598e+00, -1.31295901e-03,  1.77727072e-03, 3.90343997e+01]] # From calibrte camera
+
+device =  r"D:\2563-4\2-2563\Project\test field\New folder\new\Last 10 Blows\10 Blows = 2 mm.MOV" #"D:\2563-4\2-2563\Project\testblow\bannjet\HD2.MOV" #'rtsp://192.168.1.40:8080/h264_pcm.sdp' #"D:\2563-4\2-2563\Project\test field\642080055.699952.mp4" 
+print('press s to start the program or q to exit the program')
+print('If you want to reset the data press r')
+cap = cv2.VideoCapture(device)  # Get the camera source
+
+#Program
+data_tvecs = []  # Prepare to add tvec
+value_dis = []  # Prepare to get result distance(scalar) unit meter
+value_blow = []
+data_cX = []
+data_cY = []
+corner_ini = []
+sum_tvec=0
+tvec_ini=np.array([0,0,0])
+tvec=np.array([0,0,0])
+dist=0
+prev = 0
+blow = 0.00
+cX=0
+cY=0
+cX_ini = 300
+cY_ini = 50
+check = []
+value_check = []
+time_data = []
+print('check markerLengt', markerLength)
+time_s =time.time()
+while cap.isOpened():
+     #convert image to gray scale image
+     #Capture frame-by-frame
+    time_elapsed = time.time() - prev
+    ret, frame = cap.read()
+    #frame = cv2.resize(frame,None,None,0.4,0.4)
+    #frame = cv2.resize(frame, (720, 1280))
+
+         #operations on the frame come here
+    if not ret:
+        break
+
+    if time_elapsed > 1./frame_rate :
+        #frame = cv2.resize(frame,None,None,0.1,0.1)
+        frame = cv2.resize(frame, (720, 1280))
+        prev = time.time()
+        #frame = cv2.resize(frame, (4000, 5000))
+        #frame=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Change grayscale
+        aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)  # Use 5x5 dictionary to find markers
+        parameters = aruco.DetectorParameters_create()  # Marker detection parameters
+        # lists of ids and the corners beloning to each id
+        corners, ids, rejected_img_points = aruco.detectMarkers(gray, aruco_dict,
+                                                                parameters=parameters,
+                                                                cameraMatrix=np.float32(matrix_coefficients),
+                                                                distCoeff=np.float32(distortion_coefficients))
+        # calculate(ids,corners,matrix_coefficients,distortion_coefficients,frame)
+        if np.all(ids is not None):  # If there are markers found by detector
+            for i in range(0, len(ids)):  # Iterate in markers
+                # Estimate pose of each marker and return the values rvec and tvec---different from camera coefficients
+                rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners[i], markerLength,
+                                                                           np.float32(matrix_coefficients),
+                                                                           np.float32(distortion_coefficients))
+
+                (rvec - tvec).any()  # get rid of that nasty numpy value array error
+                aruco.drawDetectedMarkers(frame, corners)  # Draw A square around the markers
+                #aruco.drawAxis(frame, np.float32(matrix_coefficients), np.float32(distortion_coefficients),np.float32(rvec), np.float32(tvec), 0.01)  # Draw Axis
+
+                data_tvecs.append(tvec)  # get every data of tvec in array data_tvecs
+                
+                length = len(data_tvecs)  # For easy to calculate equation
+                if length >= 1:
+                    tvec_ini = data_tvecs[0]
+                    diff = data_tvecs[length - 1] - tvec_ini  # Find distance between tvec(vector)
+                    sum_tvec = sqrt(np.sum(diff ** 2))  # convert vector to scalar
+                    dist=sum_tvec
+                    value_dis.append(np.round(sum_tvec, 3))  # get the distance data(scalar)  in array value
+                    #value_check.append(np.round(sum_tvec, 3))
+                if dist != [] :
+                    time_get = time.time()- time_s 
+            
+                    time_data.append(np.round(time_get, 3))
+                #calculate move per blow
+                length = len(value_dis)
+                
+                if length>10:
+                    pile_drive = []
+                    for x in range(10):
+                        pile_drive.append(value_dis[length-x-1])
+                    #print('pile drive before', pile_drive)
+                    
+                    if np.std(pile_drive) <= .005:
+                        #print('pile drive after', pile_drive)
+                        blow = float(np.average(pile_drive))
+                        value_blow.append(np.round(blow,4))
+                        check = pd.Series(value_blow)
+                        check = check.unique()
+                    #print('value dis', value_dis)
+                    #print('pile drive :  ', pile_drive)
+                    pile_drive = []
+                    #value_dis = []
+        if len(corners) > 0:
+            # flatten the ArUco IDs list
+            ids = ids.flatten()
+            corner_ini = corners[0]
+            # loop over the detected ArUCo corners
+            for (markerCorner, markerID) in zip(corners, ids):
+                # extract the marker corners (which are always returned in
+                # top-left, top-right, bottom-right, and bottom-left order)
+                find_center =corners.copy()
+                find_center = markerCorner.reshape((4, 2))
+                (topLeft, topRight, bottomRight, bottomLeft) = find_center
+                # convert each of the (x, y)-coordinate pairs to integers
+                topRight = (int(topRight[0]), int(topRight[1]))
+                bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
+                bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+                topLeft = (int(topLeft[0]), int(topLeft[1]))
+                
+                # compute and draw the center (x, y)-coordinates of the ArUco
+                # marker
+                cX = int((topLeft[0] + bottomRight[0]) / 2.0)
+                cY = int((topLeft[1] + bottomRight[1]) / 2.0)
+                data_cX.append(cX)
+                data_cY.append(cY)
+                if len(data_cX) > 0:
+                    cX_ini = data_cX[0]
+                    cY_ini = data_cY[0]
+                
+                cv2.circle(frame, (cX_ini, cY_ini), 4, (0, 255, 0), -1)
+                cv2.circle(frame, (cX, cY), 4, (0, 0, 255), -1)
+                # draw the ArUco marker ID on the image
+                cv2.putText(frame, str(markerID),
+                            (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5, (0, 255, 0), 2)
+                cv2.putText(frame, str(topRight),
+                            (topRight[0], topRight[1] - 15), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5, (0, 255, 0), 2)
+
+                #cv2.circle(frame, (cX_ini, cY_ini), 4, (0, 255, 0), -1 )
+        fps = 1/time_elapsed
+        fps = np.round(fps, 5)
+        cv2.putText(frame, str(fps),
+                    (50,75), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (255, 255, 0), 2)
+        #cv2.putText(frame, '    order  '+ str(i) ,
+        #            (50,100), cv2.FONT_HERSHEY_SIMPLEX,
+        #            0.5, (255, 255, 0), 2)
+        cv2.putText(frame, 'Tvec inital  '+str(tvec_ini),
+                    (50,400), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (0, 255, 0), 2)
+        cv2.putText(frame, 'Tvec inital  '+str(tvec),
+                    (50,440), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (0, 255, 0), 2)
+        cv2.putText(frame, 'dist  '+str(np.round(dist,3))+'   m',
+                    (50,200), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (255, 255, 0), 2)
+        data_value_dis= pd.DataFrame(value_dis, columns = ['real Distance'])
+        data_blow = pd.DataFrame(value_blow, columns = ['avg blow']) 
+        data_check = pd.DataFrame(check, columns = ['check'])
+        
+        cv2.imshow('frame',frame)
+        # Wait 3 milisecoonds for an interaction. Check the key and do the corresponding job.
+        key = cv2.waitKey(3) & 0xFF
+        if key == ord('q'):  # Quit
+            print('/nBlow', blow)
+            print('check', check )
+            print('value check', value_check)
+            #data_blow.to_excel(patch1)
+            #data_check.to_excel(patch2)
+            break
+        if key == ord('r'):
+            print('Restart the program.')
+            data_tvecs = []  # Prepare to add tvec
+            value_dis = []  # Prepare to get result distance(scalar) unit meter
+            value_blow = []
+            pile_drive = []
+            data_cX = []
+            data_cY = []
+            corner_ini = []
+            time_data = []
+            sum_tvec=0
+        if key == ord('p'):
+            data_blow.to_excel(patch1)
+            data_check.to_excel(patch2)
+                
+       
+        startTime = time.time()
+       
+cap.release()
+# Destroy the all windows now
+cv2.destroyAllWindows()        
+
+
+#Part graph
+x= time_data
+y= value_dis
+plt.plot(x,y)
+print("")
+plt.title('LB2,Relationship between Time(sec.) and Distance(m.)')
+plt.xlabel('Time (sec.)')
+plt.ylabel('Distance (m.)')
+#plt.savefig(r'D:\2563-4\2-2563\Project\test field\report\BC8_dis1.png')
